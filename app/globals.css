@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
+  font-size: 14px;
+  color: #172B4D;
+  background: #fff;
+}
+
+/* Confluence-style scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #F4F5F7;
+}
+::-webkit-scrollbar-thumb {
+  background: #C1C7D0;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #97A0AF;
+}
+
+/* Confluence prose styles */
+.confluence-content h1 { font-size: 24px; font-weight: 600; margin: 24px 0 8px; color: #172B4D; }
+.confluence-content h2 { font-size: 20px; font-weight: 600; margin: 20px 0 8px; color: #172B4D; }
+.confluence-content h3 { font-size: 16px; font-weight: 600; margin: 16px 0 6px; color: #172B4D; }
+.confluence-content p  { margin: 8px 0; line-height: 1.714; color: #172B4D; }
+.confluence-content ul { margin: 8px 0 8px 24px; list-style: disc; }
+.confluence-content ol { margin: 8px 0 8px 24px; list-style: decimal; }
+.confluence-content li { margin: 4px 0; line-height: 1.714; }
+.confluence-content code {
+  background: #F4F5F7;
+  border: 1px solid #DFE1E6;
+  border-radius: 3px;
+  padding: 1px 6px;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 12px;
+}
+.confluence-content pre {
+  background: #F4F5F7;
+  border: 1px solid #DFE1E6;
+  border-radius: 3px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+.confluence-content pre code {
+  background: none;
+  border: none;
+  padding: 0;
+}
+.confluence-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 12px 0;
+}
+.confluence-content th {
+  background: #F4F5F7;
+  border: 1px solid #DFE1E6;
+  padding: 8px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  color: #6B778C;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.confluence-content td {
+  border: 1px solid #DFE1E6;
+  padding: 8px 12px;
+  vertical-align: top;
+}
+.confluence-content strong { font-weight: 600; }
+.confluence-content a { color: #0052CC; text-decoration: none; }
+.confluence-content a:hover { text-decoration: underline; }
+.confluence-content blockquote {
+  border-left: 3px solid #DFE1E6;
+  margin: 12px 0;
+  padding: 8px 16px;
+  color: #6B778C;
+}
+.confluence-content hr {
+  border: none;
+  border-top: 1px solid #DFE1E6;
+  margin: 20px 0;
+}
+
+/* React Flow */
+.react-flow__attribution { display: none !important; }
+
+/* Hide Next.js development mode indicator (the floating "N" button at bottom-left) */
+nextjs-portal,
+#__next-build-watcher,
+[data-next-badge],
+.__next-dev-overlay-backdrop,
+.__next-dev-overlay {
+  display: none !important;
+}
