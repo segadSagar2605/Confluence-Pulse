@@ -48,11 +48,9 @@ const OWNER_OPTIONS = [
   { value: "unassigned", label: "Unassigned" },
 ];
 
-// Classify a reviewDate string (ISO or "Q2 2025") relative to today (2026-05-17)
 function classifyReviewDate(reviewDate: string): "overdue" | "due-this-quarter" | "up-to-date" {
   const NOW = new Date("2026-05-17");
   const NOW_QUARTER = Math.floor(NOW.getMonth() / 3);
-
   const iso = new Date(reviewDate);
   if (!isNaN(iso.getTime())) {
     if (iso < NOW) return "overdue";
@@ -74,10 +72,10 @@ function classifyReviewDate(reviewDate: string): "overdue" | "due-this-quarter" 
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function DecisionGraph() {
-  const [selected, setSelected]   = useState<string | null>(null);
-  const [searchQ, setSearchQ]     = useState("");
+  const [selected, setSelected]     = useState<string | null>(null);
+  const [searchQ, setSearchQ]       = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
-  const [filters, setFilters]     = useState({ source: "all", reviewStatus: "all", owner: "all" });
+  const [filters, setFilters]       = useState({ source: "all", reviewStatus: "all", owner: "all" });
   const filterRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -90,7 +88,6 @@ export default function DecisionGraph() {
     return () => document.removeEventListener("mousedown", onMouseDown);
   }, []);
 
-  // Enrich decisions once
   const decisions = useMemo(() =>
     getAllDecisions().map((dec) => ({
       ...dec,
@@ -98,7 +95,6 @@ export default function DecisionGraph() {
       reviewCode: classifyReviewDate(dec.reviewDate),
     })), []);
 
-  // Filter + search
   const filtered = useMemo(() => {
     let items = decisions;
     if (searchQ.trim()) {
@@ -116,14 +112,12 @@ export default function DecisionGraph() {
     return items;
   }, [decisions, searchQ, filters]);
 
-  // Counts from full (unfiltered) list for summary bar
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
     for (const d of decisions) c[d.status] = (c[d.status] ?? 0) + 1;
     return c;
   }, [decisions]);
 
-  // Dismissible pills
   const activePills = useMemo(() => {
     const pills: { key: string; label: string }[] = [];
     if (filters.source !== "all")       pills.push({ key: "source",       label: `Source: ${SOURCE_OPTIONS.find((o) => o.value === filters.source)?.label}` });
@@ -158,91 +152,93 @@ export default function DecisionGraph() {
       </p>
 
       {/* ── Search + Filter row ─────────────────────────────────────────── */}
-      <div className="flex items-center gap-3 mb-3 flex-wrap">
+      <div className="flex items-center gap-3 mb-3">
 
-        {/* Search */}
-        <div className="relative w-72">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-confluence-text-subtle" />
+        {/* Search — wide, takes remaining space */}
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-confluence-text-subtle" />
           <input
             value={searchQ}
             onChange={(e) => setSearchQ(e.target.value)}
-            placeholder="Search decisions…"
-            className="w-full pl-8 pr-7 py-1.5 text-sm border border-confluence-border rounded bg-white outline-none focus:border-confluence-blue"
+            placeholder="Search decisions by title, summary, owner…"
+            className="w-full pl-9 pr-8 py-2 text-sm border border-confluence-border rounded-md bg-white outline-none focus:border-confluence-blue focus:ring-1 focus:ring-confluence-blue/20"
           />
           {searchQ && (
-            <button onClick={() => setSearchQ("")} className="absolute right-2 top-1/2 -translate-y-1/2">
+            <button onClick={() => setSearchQ("")} className="absolute right-2.5 top-1/2 -translate-y-1/2">
               <X className="w-3.5 h-3.5 text-confluence-text-subtle" />
             </button>
           )}
         </div>
 
         {/* Filter button + dropdown */}
-        <div className="relative" ref={filterRef}>
+        <div className="relative shrink-0" ref={filterRef}>
           <button
             onClick={() => setFilterOpen(!filterOpen)}
-            className={`flex items-center gap-1.5 text-sm px-3 py-1.5 rounded border transition-colors ${
+            className={`flex items-center gap-2 text-sm px-4 py-2 rounded-md border transition-colors ${
               activeFilterCount > 0 || filterOpen
                 ? "border-confluence-blue bg-confluence-blue-light text-confluence-blue"
                 : "border-confluence-border text-confluence-text-subtle hover:bg-confluence-surface-overlay"
             }`}
           >
-            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <SlidersHorizontal className="w-4 h-4" />
             Filter
             {activeFilterCount > 0 && (
-              <span className="bg-confluence-blue text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-semibold">
+              <span className="bg-confluence-blue text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-semibold leading-none">
                 {activeFilterCount}
               </span>
             )}
           </button>
 
           {filterOpen && (
-            <div className="absolute left-0 top-full mt-1 z-50 bg-white border border-confluence-border rounded-lg shadow-lg w-56 py-3">
-              {[
-                { key: "source",       label: "Source",        options: SOURCE_OPTIONS },
-                { key: "reviewStatus", label: "Review Status", options: REVIEW_OPTIONS },
-                { key: "owner",        label: "Owner",         options: OWNER_OPTIONS },
-              ].map((group, gi) => (
-                <div key={group.key}>
-                  {gi > 0 && <div className="border-t border-confluence-border mx-4 my-2" />}
-                  <div className="px-4">
-                    <p className="text-xs font-semibold text-confluence-text-subtle uppercase tracking-wide mb-2">{group.label}</p>
-                    <div className="space-y-1.5">
+            <div className="absolute right-0 top-full mt-2 z-50 bg-white border border-confluence-border rounded-xl shadow-xl w-80 overflow-hidden">
+              <div className="px-5 py-4 border-b border-confluence-border bg-confluence-surface-overlay">
+                <p className="text-xs font-semibold text-confluence-text-subtle uppercase tracking-widest">Filter decisions</p>
+              </div>
+              <div className="px-5 py-4 space-y-5">
+                {[
+                  { key: "source",       label: "Source",        options: SOURCE_OPTIONS },
+                  { key: "reviewStatus", label: "Review Status", options: REVIEW_OPTIONS },
+                  { key: "owner",        label: "Owner",         options: OWNER_OPTIONS },
+                ].map((group, gi) => (
+                  <div key={group.key}>
+                    {gi > 0 && <div className="border-t border-confluence-border -mx-5 mb-5" />}
+                    <p className="text-xs font-semibold text-confluence-text-subtle uppercase tracking-widest mb-3">{group.label}</p>
+                    <div className="grid grid-cols-2 gap-y-2 gap-x-3">
                       {group.options.map((opt) => (
-                        <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
+                        <label key={opt.value} className="flex items-center gap-2 cursor-pointer group">
                           <input
                             type="radio"
                             name={group.key}
                             value={opt.value}
                             checked={filters[group.key as keyof typeof filters] === opt.value}
                             onChange={() => setFilters((prev) => ({ ...prev, [group.key]: opt.value }))}
+                            className="accent-confluence-blue"
                           />
-                          <span className="text-sm text-confluence-text">{opt.label}</span>
+                          <span className="text-sm text-confluence-text group-hover:text-confluence-blue transition-colors">{opt.label}</span>
                         </label>
                       ))}
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
               {activeFilterCount > 0 && (
-                <>
-                  <div className="border-t border-confluence-border mx-4 mt-3 mb-2" />
-                  <div className="px-4">
-                    <button onClick={clearAll} className="text-xs text-confluence-blue hover:underline">
-                      Clear all filters
-                    </button>
-                  </div>
-                </>
+                <div className="px-5 py-3 border-t border-confluence-border bg-confluence-surface-overlay flex items-center justify-between">
+                  <span className="text-xs text-confluence-text-subtle">{activeFilterCount} filter{activeFilterCount > 1 ? "s" : ""} active</span>
+                  <button onClick={clearAll} className="text-xs text-confluence-blue font-medium hover:underline">
+                    Clear all
+                  </button>
+                </div>
               )}
             </div>
           )}
         </div>
 
         {/* Summary count bar */}
-        <div className="ml-auto flex items-center gap-2 text-xs text-confluence-text-subtle">
+        <div className="shrink-0 flex items-center gap-2 text-xs text-confluence-text-subtle">
           {(["active", "under-review", "superseded"] as StatusKey[])
             .filter((k) => (counts[k] ?? 0) > 0)
             .map((k, i) => (
-              <span key={k} className="flex items-center gap-2">
+              <span key={k} className="flex items-center gap-1.5">
                 {i > 0 && <span className="text-confluence-border">·</span>}
                 <span className="font-semibold text-confluence-text">{counts[k]}</span>
                 <span>{statusConfig[k].label}</span>
@@ -268,18 +264,8 @@ export default function DecisionGraph() {
         </div>
       )}
 
-      {/* ── Accordion list ──────────────────────────────────────────────── */}
+      {/* ── Decision list ──────────────────────────────────────────────── */}
       <div className="border border-confluence-border rounded-lg overflow-hidden">
-        {/* Column header */}
-        <div className="grid grid-cols-[160px_1fr_200px_160px_130px_28px] gap-4 px-4 py-2.5 bg-confluence-surface-overlay border-b border-confluence-border text-xs font-semibold text-gray-400 uppercase tracking-wide">
-          <span>Status</span>
-          <span>Decision</span>
-          <span>Source</span>
-          <span>Owner</span>
-          <span>Review By</span>
-          <span />
-        </div>
-
         {filtered.length === 0 ? (
           <div className="px-4 py-10 text-center text-sm text-confluence-text-subtle">
             No decisions match the current filters.
@@ -298,44 +284,75 @@ export default function DecisionGraph() {
                 {/* ── Row ── */}
                 <button
                   onClick={() => setSelected(isOpen ? null : dec.id)}
-                  className={`w-full grid grid-cols-[160px_1fr_200px_160px_130px_28px] gap-4 items-center px-4 py-3 text-left transition-colors ${
-                    isOpen
-                      ? "bg-confluence-blue-light/40"
-                      : "hover:bg-confluence-surface-overlay"
+                  className={`w-full flex items-center gap-4 px-4 py-4 text-left transition-colors ${
+                    isOpen ? "bg-confluence-blue-light/40" : "hover:bg-confluence-surface-overlay"
                   }`}
                 >
-                  <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded w-fit ${cfg.color}`}>
+                  {/* Status badge — fixed width */}
+                  <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full shrink-0 ${cfg.color}`}>
                     <StatusIcon className={`w-3 h-3 ${cfg.iconColor}`} />
                     {cfg.label}
                   </span>
-                  <span className="text-sm font-medium text-confluence-text">{dec.title}</span>
-                  <span className="text-xs text-confluence-text-subtle truncate">{dec.sourceDocTitle.split(":")[0]}</span>
-                  <span className="text-xs text-confluence-text-subtle">{dec.owner || "—"}</span>
-                  <span className="text-xs text-confluence-text-subtle">{formatDate(dec.reviewDate)}</span>
-                  <ChevronDown className={`w-4 h-4 text-confluence-text-subtle transition-transform ${isOpen ? "rotate-180" : ""}`} />
+
+                  {/* Decision title + meta key-value pairs */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-confluence-text truncate">{dec.title}</p>
+                    <div className="flex items-center flex-wrap gap-x-3 gap-y-0.5 mt-1">
+                      <span className="text-xs text-confluence-text-subtle">
+                        <span className="font-medium text-gray-400">Source</span>
+                        <span className="mx-1 text-gray-300">·</span>
+                        <span className="truncate max-w-[220px] inline-block align-bottom">{dec.sourceDocTitle.split(":")[0]}</span>
+                      </span>
+                      {dec.owner && (
+                        <span className="text-xs text-confluence-text-subtle">
+                          <span className="font-medium text-gray-400">Owner</span>
+                          <span className="mx-1 text-gray-300">·</span>
+                          {dec.owner}
+                        </span>
+                      )}
+                      <span className="text-xs text-confluence-text-subtle">
+                        <span className="font-medium text-gray-400">Review by</span>
+                        <span className="mx-1 text-gray-300">·</span>
+                        {formatDate(dec.reviewDate)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <ChevronDown className={`w-4 h-4 text-confluence-text-subtle shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} />
                 </button>
 
                 {/* ── Expanded panel ── */}
                 {isOpen && (
                   <div className="border-t border-confluence-border bg-gray-50/60 px-6 py-5">
 
-                    {/* B&W lineage */}
-                    <div className="mb-5">
-                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Decision Lineage</p>
-                      <div className="flex items-center flex-wrap gap-0">
+                    {/* Lineage — impactful horizontal timeline */}
+                    <div className="mb-6">
+                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Decision Lineage</p>
+                      <div className="relative flex items-stretch gap-0">
                         {LINEAGE.map((node, i) => (
-                          <span key={i} className="flex items-center">
-                            <div className="border border-gray-300 bg-white rounded px-3 py-2 text-center min-w-[110px]">
-                              <div className="text-xs font-semibold text-gray-800">{node.label}</div>
-                              <div className="text-xs text-gray-400 mt-0.5">{node.type}</div>
+                          <div key={i} className="flex items-center">
+                            {/* Node — fixed width, equal sizing */}
+                            <div className="w-36 border-2 border-gray-300 bg-white rounded-lg px-3 py-3 flex flex-col gap-1 shadow-sm">
+                              <p className="text-xs font-bold text-gray-800 truncate" title={node.label}>
+                                {node.label}
+                              </p>
+                              <p className="text-[10px] font-medium text-gray-400 truncate" title={node.type}>
+                                {node.type}
+                              </p>
                             </div>
+                            {/* Arrow connector */}
                             {i < LINEAGE.length - 1 && (
-                              <span className="text-gray-400 mx-2 text-sm select-none">→</span>
+                              <div className="flex items-center mx-1.5 shrink-0">
+                                <div className="w-5 h-px bg-gray-300" />
+                                <svg width="8" height="10" viewBox="0 0 8 10" className="text-gray-400 -ml-px shrink-0">
+                                  <path d="M0 0 L8 5 L0 10 Z" fill="currentColor" />
+                                </svg>
+                              </div>
                             )}
-                          </span>
+                          </div>
                         ))}
                       </div>
-                      <p className="text-xs text-gray-400 mt-2">
+                      <p className="text-xs text-gray-400 mt-3 italic">
                         Oct 2023 incident triggered ADR-007 → drove the 2024 Auth Policy → became PLAT-2301 → delivered the API Gateway PRD
                       </p>
                     </div>
