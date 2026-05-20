@@ -6,6 +6,8 @@ import {
   Search, Sparkles, AlertTriangle, CheckCircle2, Clock,
   ChevronRight, User, RotateCcw, ThumbsUp, ThumbsDown,
 } from "lucide-react";
+import { DOCUMENTS } from "@/lib/data/documents";
+import { computeTrust } from "@/lib/trust";
 
 interface Source {
   id: string;
@@ -234,13 +236,15 @@ function SearchContent() {
                         href={`/document/${src.id}`}
                         className="flex items-start gap-3 group hover:bg-confluence-surface-overlay rounded-lg p-2 -mx-2 transition-colors"
                       >
-                        <span className={`text-xs font-bold px-1.5 py-0.5 rounded shrink-0 mt-0.5 ${
-                          src.trustScore >= 80 ? "bg-confluence-green-light text-green-800" :
-                          src.trustScore >= 50 ? "bg-amber-100 text-amber-800" :
-                          "bg-red-100 text-red-800"
-                        }`}>
-                          {src.trustScore}
-                        </span>
+                        {(() => {
+                          const srcDoc = DOCUMENTS.find((d) => d.id === src.id);
+                          const t = srcDoc ? computeTrust(srcDoc) : null;
+                          return (
+                            <span className={`text-xs font-semibold px-1.5 py-0.5 rounded shrink-0 mt-0.5 whitespace-nowrap ${t ? t.bgClass : "bg-gray-100 text-gray-600"}`}>
+                              {t ? t.verdict : `${src.trustScore}/100`}
+                            </span>
+                          );
+                        })()}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span className="text-sm text-confluence-blue group-hover:underline font-medium truncate">

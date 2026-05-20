@@ -7,12 +7,13 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { DOCUMENTS } from "@/lib/data/documents";
+import { computeTrust } from "@/lib/trust";
 
 // Returns a CSS hex color — explicit style prop guarantees round rendering on all DPIs
-const trustDotColor = (score: number): string => {
+const verdictDotColor = (score: number): string => {
   if (score >= 80) return "#36B37E";  // green
   if (score >= 50) return "#FF991F";  // amber
-  return "#DE350B";                   // red — only for genuine stale/critical
+  return "#DE350B";                   // red
 };
 
 export default function Sidebar() {
@@ -20,7 +21,7 @@ export default function Sidebar() {
   const [pagesOpen, setPagesOpen] = useState(true);
 
   const spaceNav = [
-    { label: "Space Health", href: "/", icon: BarChart3 },
+    { label: "Space Health", href: "/health", icon: BarChart3 },
     { label: "Knowledge Library", href: "/library", icon: FileText },
     { label: "Trusted Search", href: "/search", icon: ShieldCheck },
     { label: "Decision Intelligence", href: "/decisions", icon: Network },
@@ -86,7 +87,7 @@ export default function Sidebar() {
                   : "text-confluence-text hover:bg-confluence-surface-overlay"
               }`}
             >
-              <FileText className="w-4 h-4 shrink-0" style={{ color: trustDotColor(doc.trustScore) }} />
+              <FileText className="w-4 h-4 shrink-0" style={{ color: verdictDotColor(computeTrust(doc).score) }} />
               <span className="truncate flex-1">{doc.title}</span>
               {doc.stewardFlags.length > 0 && (
                 <AlertTriangle className="w-3 h-3 text-amber-500 shrink-0 ml-auto opacity-0 group-hover:opacity-100" />

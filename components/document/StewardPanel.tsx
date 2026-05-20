@@ -1,9 +1,11 @@
 "use client";
 import { useState } from "react";
 import { Document } from "@/lib/data/documents";
+import { computeTrust } from "@/lib/trust";
 import {
-  Sparkles, X, Archive, UserPlus, CheckSquare, Merge,
-  AlertTriangle, ChevronRight, ExternalLink, Send,
+  Sparkles, X, Archive, UserPlus, CheckSquare,
+  AlertTriangle, ChevronRight, ExternalLink,
+  ShieldCheck, ShieldAlert, ShieldOff,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -20,6 +22,12 @@ export default function StewardPanel({ doc }: Props) {
   const [open, setOpen] = useState(true);
   const [actioned, setActioned] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<"flags" | "actions">("flags");
+
+  const trust = computeTrust(doc);
+  const VerdictIcon =
+    trust.verdict === "Trusted"            ? ShieldCheck :
+    trust.verdict === "Verify Before Using" ? ShieldAlert :
+    ShieldOff;
 
   if (!open) {
     return (
@@ -52,6 +60,14 @@ export default function StewardPanel({ doc }: Props) {
       <div className="px-4 py-2 border-b border-confluence-border bg-confluence-blue-light/40">
         <span className="text-xs text-confluence-blue">Powered by Atlassian Intelligence</span>
         <span className="text-xs text-confluence-text-subtle ml-1">· Beta</span>
+      </div>
+
+      {/* Verdict summary */}
+      <div className={`px-4 py-2 border-b border-confluence-border flex items-center gap-2 ${trust.borderClass}`}>
+        <VerdictIcon className={`w-3.5 h-3.5 shrink-0 ${trust.colorClass}`} />
+        <span className="text-xs text-confluence-text-subtle">Page verdict:</span>
+        <span className={`text-xs font-semibold ${trust.colorClass}`}>{trust.verdict}</span>
+        <span className="text-xs text-confluence-text-subtle ml-auto">{trust.score}/100</span>
       </div>
 
       {/* Tabs */}

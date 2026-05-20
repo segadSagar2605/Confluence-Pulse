@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { DOCUMENTS } from "@/lib/data/documents";
+import { computeTrust } from "@/lib/trust";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
@@ -186,7 +187,7 @@ Type: ${doc.contentType}
 Owner: ${doc.owner ?? "None"}
 Last Updated: ${doc.lastUpdated}
 Last Validated: ${doc.lastValidated ?? "Never"}
-Trust Score: ${doc.trustScore}/100
+Trust Score: ${computeTrust(doc).score}/100
 Lifecycle: ${doc.lifecycleState}
 Conflicts With: ${doc.conflictsWith.length > 0 ? doc.conflictsWith.join(", ") : "None"}
 

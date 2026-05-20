@@ -21,6 +21,7 @@ export interface Document {
   space: string;
   spaceKey: string;
   owner: string | null;
+  ownerConfirmed: boolean;
   createdBy: string;
   createdAt: string;
   lastUpdated: string;
@@ -33,7 +34,6 @@ export interface Document {
   viewCount: number;
   linkedJira: string[];
   relatedDocIds: string[];
-  trustScore: number;
   content: string;
   decisions: Decision[];
   stewardFlags: string[];
@@ -49,6 +49,7 @@ export const DOCUMENTS: Document[] = [
     space: "Platform Engineering",
     spaceKey: "PE",
     owner: null,
+    ownerConfirmed: false,
     createdBy: "Rajan Mehta",
     createdAt: "2021-03-12",
     lastUpdated: "2021-09-04",
@@ -62,7 +63,6 @@ export const DOCUMENTS: Document[] = [
     viewCount: 342,
     linkedJira: [],
     relatedDocIds: ["doc-002", "doc-003"],
-    trustScore: 24,
     conflictsWith: ["doc-002"],
     risks: [
       "Engineers reading this policy will follow deprecated API key practices",
@@ -112,11 +112,12 @@ This policy should be reviewed annually by the Platform Security lead.
     space: "Platform Engineering",
     spaceKey: "PE",
     owner: "Priya Nair",
+    ownerConfirmed: true,
     createdBy: "Priya Nair",
     createdAt: "2024-01-15",
-    lastUpdated: "2024-11-20",
-    lastValidated: "2025-02-10",
-    reviewCadence: "Annual — due Feb 2026",
+    lastUpdated: "2026-04-01",
+    lastValidated: "2026-04-01",
+    reviewCadence: "Annual — due Apr 2027",
     summary:
       "The authoritative authentication standard for Platform Engineering, effective Q1 2024. Mandates OAuth 2.0 with short-lived tokens for all API integrations, replacing the 2021 API key model. Validated by Priya Nair in February 2025 and linked to completed Jira epics PLAT-2301 and PLAT-2302.",
     contentType: "policy",
@@ -125,8 +126,7 @@ This policy should be reviewed annually by the Platform Security lead.
     viewCount: 891,
     linkedJira: ["PLAT-2301", "PLAT-2302", "SEC-445"],
     relatedDocIds: ["doc-001", "doc-003", "doc-004"],
-    trustScore: 91,
-    conflictsWith: ["doc-001"],
+    conflictsWith: [],
     risks: [
       "Older policy (doc-001) is still indexed and accessible — engineers may find it first via search",
       "Auth troubleshooting runbook (doc-006) still references API keys rather than OAuth 2.0 flows",
@@ -184,11 +184,12 @@ Non-compliant services after December 2024 will have API access suspended. Conta
     space: "Platform Engineering",
     spaceKey: "PE",
     owner: "Arjun Sharma",
+    ownerConfirmed: true,
     createdBy: "Arjun Sharma",
     createdAt: "2023-11-28",
-    lastUpdated: "2024-01-08",
-    lastValidated: "2024-06-01",
-    reviewCadence: "When status changes — next check Jan 2025",
+    lastUpdated: "2026-03-15",
+    lastValidated: "2026-03-15",
+    reviewCadence: "When status changes — reviewed Mar 2026",
     summary:
       "Architecture Decision Record formally adopting OAuth 2.0 as the mandatory authentication standard across all Platform Engineering services. Written in the immediate aftermath of the October 2023 API key compromise. Evaluates and rejects three alternatives: enhanced key management, mTLS, and HMAC-signed requests. Approved by the CTO Office and Security.",
     contentType: "adr",
@@ -197,7 +198,6 @@ Non-compliant services after December 2024 will have API access suspended. Conta
     viewCount: 512,
     linkedJira: ["PLAT-2201", "PLAT-2301", "SEC-445"],
     relatedDocIds: ["doc-002", "doc-004"],
-    trustScore: 88,
     conflictsWith: [],
     risks: [
       "mTLS (deferred to 2025) has not been revisited — decision review date passed",
@@ -285,19 +285,19 @@ Accepted as a transitional measure for legacy systems only, with a hard sunset d
     space: "Platform Engineering",
     spaceKey: "PE",
     owner: "Kavita Rao",
+    ownerConfirmed: true,
     createdBy: "Kavita Rao",
     createdAt: "2023-10-22",
-    lastUpdated: "2023-11-05",
-    lastValidated: "2024-01-15",
+    lastUpdated: "2026-04-10",
+    lastValidated: "2026-04-10",
     contentType: "incident",
     lifecycleState: "current",
     tags: ["incident", "security", "api-key", "postmortem", "p0"],
     viewCount: 1247,
     linkedJira: ["SEC-445", "SEC-446", "PLAT-2201", "INC-2023-047"],
     relatedDocIds: ["doc-002", "doc-003"],
-    trustScore: 95,
     conflictsWith: [],
-    reviewCadence: "One-time — incident review closed Nov 2023",
+    reviewCadence: "One-time — reviewed and closed Apr 2026",
     summary:
       "Post-incident review for the October 2023 P0 security incident in which a long-lived API key was accidentally committed to a public GitHub repository. Covers the full 72-hour response timeline, root cause analysis, impact assessment (14 services exposed, 0 data exfiltrated), and five action items — all now closed. This incident directly triggered ADR-007 and the 2024 Auth Policy mandate.",
     risks: [
@@ -359,19 +359,19 @@ The fundamental issue is not operational hygiene — it is architecture. API key
     space: "Platform Engineering",
     spaceKey: "PE",
     owner: "Sneha Kulkarni",
+    ownerConfirmed: false,
     createdBy: "Sneha Kulkarni",
     createdAt: "2023-12-10",
-    lastUpdated: "2024-03-15",
-    lastValidated: "2024-03-15",
+    lastUpdated: "2025-09-15",
+    lastValidated: "2025-09-15",
     contentType: "prd",
     lifecycleState: "needs-review",
     tags: ["prd", "api-gateway", "oauth", "platform", "q1-2024"],
     viewCount: 678,
     linkedJira: ["PLAT-2300", "PLAT-2301", "PLAT-2302", "PLAT-2303"],
     relatedDocIds: ["doc-002", "doc-003"],
-    trustScore: 67,
     conflictsWith: [],
-    reviewCadence: "At project milestones — overdue since Q2 2024",
+    reviewCadence: "At project milestones — last reviewed Sep 2025",
     summary:
       "Product requirements document for the API Gateway modernisation initiative, written to support the OAuth 2.0 migration mandated in ADR-007. Covers gateway-level token validation, migration tooling, and service team rollout targets. Last validated in March 2024; linked Jira epics PLAT-2301 and PLAT-2302 have since been closed, suggesting the core work is complete but the PRD has not been updated to reflect final outcomes.",
     risks: [
@@ -439,11 +439,12 @@ The current API Gateway does not support OAuth 2.0 token validation. Following t
     space: "Platform Engineering",
     spaceKey: "PE",
     owner: null,
+    ownerConfirmed: false,
     createdBy: "Rahul Verma",
     createdAt: "2021-06-10",
     lastUpdated: "2022-02-14",
     lastValidated: null,
-    reviewCadence: "Quarterly — last completed never",
+    reviewCadence: "Quarterly — never completed",
     summary:
       "Operational runbook for on-call engineers troubleshooting API authentication failures. Written in 2021 when API key-based auth was the standard. The runbook covers 401/403 errors, key rotation, and emergency key compromise procedures — all specific to API keys. Rahul Verma (original author) left the company in 2023; no replacement owner has been assigned. The runbook is the highest-traffic page in the space at 2,341 views, meaning engineers are actively following critically outdated guidance.",
     risks: [
@@ -464,7 +465,6 @@ The current API Gateway does not support OAuth 2.0 token validation. Following t
     viewCount: 2341,
     linkedJira: [],
     relatedDocIds: ["doc-001"],
-    trustScore: 18,
     conflictsWith: ["doc-002"],
     stewardFlags: [
       "CRITICAL — highest-traffic page in space (2,341 views) with no owner and conflicting content",
@@ -539,16 +539,11 @@ export function getSpaceDocuments(spaceKey: string): Document[] {
 }
 
 export function getSpaceHealth() {
-  const docs = DOCUMENTS;
   return {
-    total: docs.length,
-    healthy: docs.filter((d) => d.trustScore >= 80).length,
-    needsReview: docs.filter((d) => d.trustScore >= 50 && d.trustScore < 80).length,
-    stale: docs.filter((d) => d.trustScore < 50 && d.trustScore >= 20).length,
-    critical: docs.filter((d) => d.trustScore < 20).length,
-    ownerless: docs.filter((d) => !d.owner).length,
-    conflicting: docs.filter((d) => d.conflictsWith.length > 0).length,
-    highTrafficOutdated: docs.filter((d) => d.viewCount > 500 && d.trustScore < 50).length,
+    total:       DOCUMENTS.length,
+    ownerless:   DOCUMENTS.filter((d) => !d.owner).length,
+    conflicting: DOCUMENTS.filter((d) => d.conflictsWith.length > 0).length,
+    neverReviewed: DOCUMENTS.filter((d) => !d.lastValidated).length,
   };
 }
 

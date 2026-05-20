@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getDocumentById, DOCUMENTS } from "@/lib/data/documents";
-import { trustBgColor, trustLabel, lifecycleBadgeColor, lifecycleLabel, formatDate, monthsAgo } from "@/lib/utils";
+import { lifecycleBadgeColor, lifecycleLabel, formatDate, monthsAgo } from "@/lib/utils";
+import { computeTrust } from "@/lib/trust";
 import TrustScoreBar from "@/components/document/TrustScoreBar";
 import DocumentContent from "@/components/document/DocumentContent";
 import StewardPanel from "@/components/document/StewardPanel";
@@ -29,10 +30,10 @@ export default async function DocumentPage({ params }: { params: Promise<{ id: s
     <div className="flex h-full">
       {/* Main content area */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto px-8 py-8">
+        <div className="max-w-4xl px-6 py-6">
           {/* Breadcrumb */}
           <div className="flex items-center gap-1.5 text-sm text-confluence-text-subtle mb-4 flex-wrap">
-            <Link href="/" className="hover:text-confluence-blue">Platform Engineering</Link>
+            <Link href="/" className="hover:text-confluence-blue">Space Health</Link>
             <ChevronRight className="w-3.5 h-3.5" />
             <Link href="/library" className="hover:text-confluence-blue">Knowledge Library</Link>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -92,21 +93,25 @@ export default async function DocumentPage({ params }: { params: Promise<{ id: s
             <div className="mt-8 border-t border-confluence-border pt-6">
               <h3 className="text-sm font-semibold text-confluence-text mb-3">Related Pages</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {relatedDocs.map((rd) => rd && (
-                  <Link
-                    key={rd.id}
-                    href={`/document/${rd.id}`}
-                    className="flex items-center gap-3 border border-confluence-border rounded-lg px-3 py-2.5 hover:border-confluence-blue hover:bg-confluence-blue-light transition-colors group"
-                  >
-                    <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${trustBgColor(rd.trustScore)}`}>
-                      {rd.trustScore}
-                    </span>
-                    <span className="text-sm text-confluence-text group-hover:text-confluence-blue font-medium truncate">
-                      {rd.title}
-                    </span>
-                    <ExternalLink className="w-3.5 h-3.5 text-confluence-text-subtle ml-auto shrink-0" />
-                  </Link>
-                ))}
+                {relatedDocs.map((rd) => {
+                  if (!rd) return null;
+                  const rdTrust = computeTrust(rd);
+                  return (
+                    <Link
+                      key={rd.id}
+                      href={`/document/${rd.id}`}
+                      className="flex items-center gap-3 border border-confluence-border rounded-lg px-3 py-2.5 hover:border-confluence-blue hover:bg-confluence-blue-light transition-colors group"
+                    >
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded whitespace-nowrap ${rdTrust.bgClass}`}>
+                        {rdTrust.verdict}
+                      </span>
+                      <span className="text-sm text-confluence-text group-hover:text-confluence-blue font-medium truncate">
+                        {rd.title}
+                      </span>
+                      <ExternalLink className="w-3.5 h-3.5 text-confluence-text-subtle ml-auto shrink-0" />
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           )}

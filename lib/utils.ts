@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// ─── Trust display helpers ────────────────────────────────────────────────────
+// ─── Legacy trust display helpers (used by config-band filters) ───────────────
 
 export function trustBgColor(score: number): string {
   return getTrustBand(score).bg;
@@ -21,7 +21,7 @@ export function trustColorClass(score: number): string {
   return getTrustBand(score).color;
 }
 
-// ─── Lifecycle (kept for backwards compat, used in dashboard) ─────────────────
+// ─── Lifecycle ────────────────────────────────────────────────────────────────
 
 export function lifecycleLabel(state: string): string {
   const map: Record<string, string> = {
@@ -55,33 +55,32 @@ export function formatDate(dateStr: string): string {
 
 export function monthsAgo(dateStr: string): number {
   const date = new Date(dateStr);
-  const now = new Date();
+  const now  = new Date();
   return (
     (now.getFullYear() - date.getFullYear()) * 12 +
     (now.getMonth() - date.getMonth())
   );
 }
 
-// ─── Review Status — conditional by page type ─────────────────────────────────
+// ─── Review Status ────────────────────────────────────────────────────────────
 
 export type ReviewStatusCode =
-  | "not-required"      // low-risk page type — review not applicable
-  | "never-reviewed"    // required but lastValidated is null
-  | "overdue"           // required, reviewed before, but cadence exceeded
-  | "up-to-date";       // required and within cadence
+  | "not-required"
+  | "never-reviewed"
+  | "overdue"
+  | "up-to-date";
 
 export interface ReviewStatus {
   code: ReviewStatusCode;
-  label: string;           // short label for table/badge
-  explanation: string;     // full sentence for trust panel
-  badgeColor: string;      // tailwind classes
+  label: string;
+  explanation: string;
+  badgeColor: string;
   monthsOverdue?: number;
 }
 
 export function getReviewStatus(doc: Document): ReviewStatus {
   const rule = PAGE_TYPE_RULES[doc.contentType];
 
-  // Low-risk page types: review not applicable
   if (!rule.reviewRequired || rule.cadenceMonths === null) {
     return {
       code: "not-required",
@@ -91,10 +90,7 @@ export function getReviewStatus(doc: Document): ReviewStatus {
     };
   }
 
-  const referenceDate = doc.lastValidated ?? null;
-
-  // Required but never reviewed
-  if (!referenceDate) {
+  if (!doc.lastValidated) {
     return {
       code: "never-reviewed",
       label: "Never reviewed",
@@ -103,25 +99,23 @@ export function getReviewStatus(doc: Document): ReviewStatus {
     };
   }
 
-  const elapsed = monthsAgo(referenceDate);
+  const elapsed = monthsAgo(doc.lastValidated);
   const overdue = elapsed - rule.cadenceMonths;
 
-  // Within cadence
   if (overdue <= 0) {
     const dueIn = Math.abs(overdue);
     return {
       code: "up-to-date",
       label: "Up to date",
-      explanation: `Reviewed ${formatDate(referenceDate)} — next review due in ${dueIn} month${dueIn !== 1 ? "s" : ""}.`,
+      explanation: `Reviewed ${formatDate(doc.lastValidated)} — next review due in ${dueIn} month${dueIn !== 1 ? "s" : ""}.`,
       badgeColor: "bg-confluence-green-light text-green-800",
     };
   }
 
-  // Overdue
   return {
     code: "overdue",
     label: `Overdue ${overdue}m`,
-    explanation: `Required — overdue by ${overdue} month${overdue !== 1 ? "s" : ""}. Last reviewed ${formatDate(referenceDate)}.`,
+    explanation: `Required — overdue by ${overdue} month${overdue !== 1 ? "s" : ""}. Last reviewed ${formatDate(doc.lastValidated)}.`,
     badgeColor: "bg-confluence-yellow-light text-amber-800",
     monthsOverdue: overdue,
   };
